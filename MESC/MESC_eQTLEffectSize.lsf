@@ -1,0 +1,68 @@
+#BSUB -J filter_map[1-48]
+#BSUB -W 200:00
+#BSUB -o /rsrch5/scratch/epi/abhattacharya3/out_%J_%I.out
+#BSUB -e /rsrch5/scratch/epi/abhattacharya3/out_%J_%I.err 
+#BSUB -q long 
+#BSUB -n 1		# Request all procs
+#BSUB -M 30		# Maximum!
+#BSUB -R rusage[mem=30]
+## explanation of arguments above:
+## -J arbitrary job name
+## -W wallclock in hour:min
+## -o use this or output (stdout) will be sent via email!
+## -e use this or errors (stderr) will be sent via email!
+## -q queue name (short is the default)
+## -n min_proc[,max_proc]  number of processors required (28=entire node)
+## -M memory in GB 
+## -R memory in GB 
+## -u EmailAddress
+
+module load anaconda3
+eval "$(/risapps/rhel8/anaconda3/2023.07-2/bin/conda shell.bash hook)"
+
+module load plink
+
+conda activate mesc
+
+mesc_folder=/rsrch5/home/epi/bhattacharya_lab/software/mesc
+plink=/rsrch5/home/epi/bhattacharya_lab/software/plink_dr/plink
+bfile=/rsrch5/home/epi/bhattacharya_lab/data/GTEx_v8/GTEx.WGS.838.passOnly.geno0.05.hwe0.00001.dbsnp.SNPsOnly.NoAmbig.LDREF
+
+
+### estimate eQTL effect sizes in each individual condition
+cd /rsrch5/home/epi/bhattacharya_lab/data/GTEx_v8/
+this_tissue="$(head tissue_list.txt -n $LSB_JOBINDEX | tail -n 1)"
+#this_tissue=${tissues[$tissue_index]}
+echo $this_tissue
+
+cd /rsrch5/home/epi/bhattacharya_lab/data/GTEx_v8/$this_tissue
+$plink --bfile $bfile --keep-fam keep.fam --make-bed --out mesc_plink
+
+
+for chr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
+do
+
+	mkdir /rsrch5/scratch/epi/abhattacharya3/$this_tissue
+	mkdir /rsrch5/scratch/epi/abhattacharya3/$this_tissue/gene
+
+	$mesc_folder/run_mesc.py --compute-expscore-indiv \
+	--plink-path $plink \
+	--expression-matrix MESC_gene_exp.tsv \
+	--exp-bfile mesc_plink \
+	--geno-bfile mesc_plink \
+	--chr $chr \
+	--tmp /rsrch5/scratch/epi/abhattacharya3/$this_tissue/gene \
+	--out mesc_gene --est-lasso-only
+
+	mkdir /rsrch5/scratch/epi/abhattacharya3/$this_tissue/tx
+
+	$mesc_folder/run_mesc.py --compute-expscore-indiv \
+	--plink-path $plink \
+	--expression-matrix MESC_tx_exp.tsv \
+	--exp-bfile mesc_plink \
+	--geno-bfile mesc_plink \
+	--chr $chr \
+	--tmp /rsrch5/scratch/epi/abhattacharya3/$this_tissue/gene \
+	--out mesc_tx --est-lasso-only
+
+done

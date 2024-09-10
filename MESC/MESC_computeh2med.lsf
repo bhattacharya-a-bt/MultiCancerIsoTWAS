@@ -1,0 +1,51 @@
+#BSUB -J mesc
+#BSUB -W 200:00
+#BSUB -o /rsrch5/scratch/epi/abhattacharya3/out_%J_%I.out
+#BSUB -e /rsrch5/scratch/epi/abhattacharya3/out_%J_%I.err 
+#BSUB -q long 
+#BSUB -n 1		# Request all procs
+#BSUB -M 30		# Maximum!
+#BSUB -R rusage[mem=30]
+## explanation of arguments above:
+## -J arbitrary job name
+## -W wallclock in hour:min
+## -o use this or output (stdout) will be sent via email!
+## -e use this or errors (stderr) will be sent via email!
+## -q queue name (short is the default)
+## -n min_proc[,max_proc]  number of processors required (28=entire node)
+## -M memory in GB 
+## -R memory in GB 
+## -u EmailAddress
+
+module load anaconda3
+eval "$(/risapps/rhel8/anaconda3/2023.07-2/bin/conda shell.bash hook)"
+
+module load plink
+
+conda activate mesc
+
+mesc_folder=/rsrch5/home/epi/bhattacharya_lab/software/mesc
+plink=/rsrch5/home/epi/bhattacharya_lab/software/plink_dr/plink
+bfile=/rsrch5/home/epi/bhattacharya_lab/data/GTEx_v8/GTEx.WGS.838.passOnly.geno0.05.hwe0.00001.dbsnp.SNPsOnly.NoAmbig.LDREF
+gwas_folder=/rsrch5/home/epi/bhattacharya_lab/data/munged_GWAS
+
+cd $gwas_folder
+
+for fq in *.tsv.gz
+
+do
+
+# create a prefix
+base=`basename $fq .tsv.gz`
+
+$mesc_folder/run_mesc.py \
+--h2med $gwas_folder/$fq \
+--exp-chr /rsrch5/home/epi/bhattacharya_lab/data/GTEx_v8/MESC_expscores_gene/mesc_gene_meta \
+--batch-size 1000 \
+--out $gwas_folder/gene_$base
+
+$mesc_folder/run_mesc.py \
+--h2med $gwas_folder/$fq \
+--exp-chr /rsrch5/home/epi/bhattacharya_lab/data/GTEx_v8/MESC_expscores_tx/mesc_tx_meta_ \
+--batch-size 1000 \
+--out $gwas_folder/tx_$base
