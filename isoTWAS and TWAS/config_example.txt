@@ -1,0 +1,24 @@
+# Configuration file for finemapping pipeline
+
+# Directory paths
+results_dir: "PATH_TO_RESULTS_DIR"
+model_dir: "PATH_TO_MODEL_DIR"
+reference_file: "PATH_TO_REFERENCE_FILE"
+temp_dir: "PATH_TO_TEMP_DIR"
+output_dir: "PATH_TO_OUTPUT_DIR"
+
+# Input files
+isotwas_results_file: "AllResults_isoTWAS_PanCan.tsv"
+twas_results_file: "AllResults_TWAS_PanCan.tsv"
+
+# Configuration options
+run_isotwas: true
+run_twas: true
+
+# Optional: Specify traits to process (leave empty to process all)
+# If specified, only these traits will be processed
+selected_traits:
+  - "0_Breast_cancer.AUTO_Finalcleaned"
+  - "0_Cimba_Ovarian_serous.AUTO_Finalcleaned"
+  - "0_ovarian.European_overall.AUTO_Finalcleaned"
+  # Add more traits as needed
