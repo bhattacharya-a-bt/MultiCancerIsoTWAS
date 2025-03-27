@@ -1,0 +1,23 @@
+# Directory paths
+results_dir: "./results"
+model_dir: "./models"
+reference_file: "./reference/reference"
+temp_dir: "./temp"
+output_dir: "./output"
+
+# Input files
+isotwas_results_file: "isotwas_results.tsv"
+twas_results_file: "twas_results.tsv"
+
+# Sample data files
+gwas_file: "SampleGWASData.tsv.gz"
+isotwas_models: ["BABAM1_isoTWAS.RDS", "KLF2_isotwas.RDS"]
+ld_matrices: ["BABAM1_LD_matrix.rds", "KLF2_LD_matrix.rds"]
+
+# Configuration options
+run_isotwas: true
+run_twas: false
+
+# Optional: Specify traits to process (leave empty to process all)
+selected_traits:
+  - "sample_trait"
